@@ -157,6 +157,7 @@ async def client(engine, seed_data):
 # ---------------------------------------------------------------------------
 
 
+
 class TestScores:
     @pytest.mark.asyncio
     async def test_scores_returns_200(self, client: AsyncClient):
@@ -369,3 +370,5 @@ class TestGroups:
             assert "group" in item
             assert "avg_score" in item
             assert "students" in item
+
+
