@@ -1,7 +1,7 @@
-print(" analytics.py loaded")
+print("analytics.py loaded")
 from fastapi import APIRouter, Depends, Query
 from sqlmodel.ext.asyncio.session import AsyncSession
-from sqlmodel import select, func, and_
+from sqlmodel import select, func
 from app.database import get_session
 from app.models import Item, InteractionLog, Learner
 from typing import List, Dict, Any
@@ -30,8 +30,12 @@ async def get_scores(
 ) -> List[Dict[str, Any]]:
     tasks = await get_lab_tasks(lab, session)
     if not tasks:
-        return [{"bucket": "0-25", "count": 0}, {"bucket": "26-50", "count": 0},
-                {"bucket": "51-75", "count": 0}, {"bucket": "76-100", "count": 0}]
+        return [
+            {"bucket": "0-25", "count": 0},
+            {"bucket": "26-50", "count": 0},
+            {"bucket": "51-75", "count": 0},
+            {"bucket": "76-100", "count": 0}
+        ]
 
     task_ids = [t.id for t in tasks]
     stmt = select(InteractionLog.score).where(InteractionLog.item_id.in_(task_ids))
@@ -70,8 +74,8 @@ async def get_pass_rates(
         row = (await session.execute(stmt)).first()
         result.append({
             "task": task.title,
-            "avg_score": round(row.avg_score, 1) if row.avg_score else 0.0,
-            "attempts": row.attempts
+            "avg_score": round(row.avg_score, 1) if row and row.avg_score else 0.0,
+            "attempts": row.attempts if row else 0
         })
     return result
 
@@ -112,5 +116,11 @@ async def get_groups(
     ).where(InteractionLog.item_id.in_(task_ids)
     ).group_by(Learner.group).order_by(Learner.group)
     result = await session.execute(stmt)
-    return [{"group": row.group, "avg_score": round(row.avg_score, 1) if row.avg_score else 0.0,
-             "students": row.students} for row in result] 
+    return [
+        {
+            "group": row.group,
+            "avg_score": round(row.avg_score, 1) if row.avg_score else 0.0,
+            "students": row.students
+        }
+        for row in result
+    ]
