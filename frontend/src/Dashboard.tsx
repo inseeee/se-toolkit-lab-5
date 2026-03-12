@@ -26,13 +26,29 @@ ChartJS.register(
 const API_BASE_URL = import.meta.env.VITE_API_TARGET || 'http://10.93.26.90:42002';
 const API_TOKEN_KEY = 'api_token';
 
+interface ScoreData {
+  bucket: string;
+  count: number;
+}
+
+interface TimelineData {
+  date: string;
+  submissions: number;
+}
+
+interface PassRateData {
+  task: string;
+  avg_score: number;
+  attempts: number;
+}
+
 const Dashboard: React.FC = () => {
-  const [lab, setLab] = useState('lab-04');
-  const [scores, setScores] = useState<any[]>([]);
-  const [timeline, setTimeline] = useState<any[]>([]);
-  const [passRates, setPassRates] = useState<any[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [lab, setLab] = useState<string>('lab-04');
+  const [scores, setScores] = useState<ScoreData[]>([]);
+  const [timeline, setTimeline] = useState<TimelineData[]>([]);
+  const [passRates, setPassRates] = useState<PassRateData[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
 
   const token = localStorage.getItem(API_TOKEN_KEY) || '';
 
@@ -58,9 +74,9 @@ const Dashboard: React.FC = () => {
           throw new Error('Failed to fetch data');
         }
 
-        const scoresData = await scoresRes.json();
-        const timelineData = await timelineRes.json();
-        const passRatesData = await passRatesRes.json();
+        const scoresData: ScoreData[] = await scoresRes.json();
+        const timelineData: TimelineData[] = await timelineRes.json();
+        const passRatesData: PassRateData[] = await passRatesRes.json();
 
         setScores(scoresData);
         setTimeline(timelineData);
